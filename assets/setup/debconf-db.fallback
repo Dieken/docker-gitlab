@@ -1,0 +1,18 @@
+Name: postfix/main_mailer_type
+Template: postfix/main_mailer_type
+Value: Internet with smarthost
+Owners: postfix
+Flags: seen
+
+Name: postfix/mailname
+Template: postfix/mailname
+Value: corp.example.com
+Owners: postfix
+Flags: seen
+
+Name: postfix/relayhost
+Template: postfix/relayhost
+Value: smtp-relay.corp.example.com
+Owners: postfix
+Flags: seen
+

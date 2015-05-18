@@ -1,28 +1,35 @@
-FROM sameersbn/ubuntu:14.04.20150504
-MAINTAINER sameer@damagehead.com
+FROM debian:jessie
+MAINTAINER Yubao Liu <yubao.liu@yahoo.com>
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv E1DD270288B4E6030699E45FA1715D88E1DF1F24 \
- && echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main" >> /etc/apt/sources.list \
- && apt-key adv --keyserver keyserver.ubuntu.com --recv 80F70E11F0F0D5F10CB20E62F5DA5F09C3173AA6 \
- && echo "deb http://ppa.launchpad.net/brightbox/ruby-ng/ubuntu trusty main" >> /etc/apt/sources.list \
- && apt-key adv --keyserver keyserver.ubuntu.com --recv 8B3981E7A6852F782CC4951600A6F0A3C300EE8C \
- && echo "deb http://ppa.launchpad.net/nginx/stable/ubuntu trusty main" >> /etc/apt/sources.list \
- && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
- && echo 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+COPY assets/setup/ /app/setup/
+
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.old \
+ && cp /app/setup/mirrors.aliyun.com-jessie.list /etc/apt/sources.list.d/ \
+ && export APT_LISTBUGS_FRONTEND=none \
+ && export APT_LISTCHANGES_FRONTEND=none \
+ && export DEBIAN_FRONTEND=noninteractive \
+ && export DEBCONF_DB_FALLBACK="File{filename:/app/setup/debconf-db.fallback}" \
  && apt-get update \
+ && apt-get install -y apt-utils git less perl-modules pwgen vim-tiny whiptail \
+ && ( cd /etc && git init && chmod 700 .git && git config user.email "root@localhost" ) \
+ && apt-get dist-upgrade -y \
+ && apt-get install -y etckeeper postfix sudo wget net-tools ca-certificates unzip \
+ && sed -i -e "s/`hostname`/git/g" /etc/postfix/main.cf \
+ && newaliases \
  && apt-get install -y supervisor logrotate locales \
-      nginx openssh-server mysql-client postgresql-client redis-tools \
-      git-core ruby2.1 python2.7 python-docutils nodejs \
-      libmysqlclient18 libpq5 zlib1g libyaml-0-2 libssl1.0.0 \
+      nginx openssh-server postgresql-client redis-tools \
+      git ruby bundler python python-docutils nodejs \
+      libkrb5-3 libpq5 zlib1g libyaml-0-2 libssl1.0.0 \
       libgdbm3 libreadline6 libncurses5 libffi6 \
       libxml2 libxslt1.1 libcurl3 libicu52 \
  && update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
  && locale-gen en_US.UTF-8 \
  && dpkg-reconfigure locales \
- && gem install --no-document bundler \
+ && gem sources -c \
+ && gem sources -a https://ruby.taobao.org/ \
+ && gem sources -a http://mirrors.aliyun.com/rubygems/ \
  && rm -rf /var/lib/apt/lists/* # 20150504
 
-COPY assets/setup/ /app/setup/
 RUN chmod 755 /app/setup/install
 RUN /app/setup/install
 

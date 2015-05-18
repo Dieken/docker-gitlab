@@ -18,7 +18,7 @@ apt-get update
 
 # install build dependencies for gem installation
 apt-get install -y gcc g++ make patch pkg-config cmake \
-  libc6-dev ruby2.1-dev \
+  libc6-dev ruby-dev libkrb5-dev \
   libmysqlclient-dev libpq-dev zlib1g-dev libyaml-dev libssl-dev \
   libgdbm-dev libreadline-dev libncurses5-dev libffi-dev \
   libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev
@@ -41,6 +41,8 @@ sudo -u git -H mkdir -p ${GITLAB_DATA_DIR}
 echo "Cloning gitlab-ce v.${GITLAB_VERSION}..."
 sudo -u git -H git clone -q -b v${GITLAB_VERSION} --depth 1 \
   https://github.com/gitlabhq/gitlabhq.git ${GITLAB_INSTALL_DIR}
+
+sed -i -e 's|https://rubygems.org|https://ruby.taobao.org|g' ${GITLAB_INSTALL_DIR}/{Gemfile,Gemfile.lock}
 
 cd ${GITLAB_INSTALL_DIR}
 
@@ -246,7 +248,7 @@ EOF
 
 # purge build dependencies
 apt-get purge -y --auto-remove gcc g++ make patch pkg-config cmake \
-  libc6-dev ruby2.1-dev \
+  libc6-dev ruby-dev libkrb5-dev \
   libmysqlclient-dev libpq-dev zlib1g-dev libyaml-dev libssl-dev \
   libgdbm-dev libreadline-dev libncurses5-dev libffi-dev \
   libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev
